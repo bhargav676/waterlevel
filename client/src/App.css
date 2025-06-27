@@ -1,43 +1,42 @@
-/* In your index.css or App.css */
 
-/* Custom text shadow for better readability on varied backgrounds */
-.text-shadow {
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+.text-shadow-strong {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* Water wave animation */
 @keyframes wave {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
-@keyframes wave-reverse {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(50%); }
-}
-
 .animate-wave {
   animation: wave 4s linear infinite;
+  transform-origin: bottom;
+}
+
+@keyframes wave-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
 }
 
 .animate-wave-reverse {
-  animation: wave-reverse 5s linear infinite;
+  animation: wave-reverse 6s linear infinite;
+  transform-origin: bottom;
 }
 
-.bg-wave {
-  /* A more subtle wave SVG, with a different color to match the new gradient */
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,23.5V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" style="fill:%2306b6d4;"></path></svg>');
-  background-size: 100% 100%;
-  background-position: bottom;
+.bg-wave-mask {
+  background-color: #3b82f6; 
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><defs><linearGradient id="wave-gradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.8)" /><stop offset="100%" style="stop-color:rgba(255,255,255,0)" /></linearGradient></defs><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,23.5V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="url(%23wave-gradient)"></path></svg>');
+  mask-size: 100% 100%;
+  mask-repeat: repeat-x;
 }
 
-/* For the second, slower wave */
-.bg-wave-reverse {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,23.5V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" style="fill:%230ea5e9;"></path></svg>');
+.bg-wave-mask-reverse {
+  background-color: #60a5fa; 
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><defs><linearGradient id="wave-gradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.8)" /><stop offset="100%" style="stop-color:rgba(255,255,255,0)" /></linearGradient></defs><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,23.5V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="url(%23wave-gradient)"></path></svg>');
+  mask-size: 100% 100%;
+  mask-repeat: repeat-x;
 }
 
-
-/* Modal fade-in and scale-up animation */
 @keyframes fade-in-up {
   0% {
     opacity: 0;

@@ -25,7 +25,7 @@ const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
 // In-memory cache for tracking last alert time per mobile number
 const alertTimestamps = {};
-const ALERT_COOLDOWN = 300000; // 5 minutes in milliseconds
+const ALERT_COOLDOWN = 1000; // 5 minutes in milliseconds
 
 app.use(cors());
 app.use(express.json());
