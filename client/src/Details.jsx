@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import axios from 'axios';
@@ -19,7 +19,7 @@ const NotificationIcon = () => (
 
 const LoadingSpinner = () => (
   <div className="flex flex-col items-center justify-center p-10 bg-white rounded-lg shadow-md">
-    <div className="w-12 h-12 rounded-full animate-spin border-4 border-dashed border-blue-500 border-t-transparent"></div>
+    <div className="w-12 h-12 rounded-full animate-spin border-4 border-dashed border-cyan-500 border-t-transparent"></div>
     <p className="mt-4 text-gray-600">Fetching Data...</p>
   </div>
 );
@@ -31,11 +31,12 @@ const ErrorMessage = ({ message }) => (
   </div>
 );
 
+// --- UPDATED: The 'Full' status now uses cyan-500 for consistency ---
 const getStatusInfo = (percentage) => {
     if (percentage == null) return { text: 'N/A', color: 'bg-gray-400 text-white' };
     if (percentage < 20) return { text: 'Low', color: 'bg-red-500 text-white' };
     if (percentage < 80) return { text: 'Normal', color: 'bg-green-500 text-white' };
-    return { text: 'Full', color: 'bg-blue-600 text-white' };
+    return { text: 'Full', color: 'bg-cyan-500 text-white' };
 };
 
 
@@ -63,12 +64,12 @@ const WaterTank = ({ levelPercentage }) => {
         
         {/* Water inside the tank */}
         <div 
-          className="absolute bottom-0 left-0 w-full bg-blue-500 transition-all duration-700 ease-out"
+          className="absolute bottom-0 left-0 w-full bg-cyan-500 transition-all duration-700 ease-out"
           style={{ height: `${level}%` }}
         >
           {/* Water Surface (elliptical shape) */}
           <div 
-            className="absolute -top-1 left-0 w-full h-8 bg-blue-400 rounded-[100%] z-10"
+            className="absolute -top-1 left-0 w-full h-8 bg-cyan-400 rounded-[100%] z-10"
             style={{ transform: 'scaleX(1.1)' }}
           ></div>
           
@@ -120,7 +121,22 @@ function Details() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [alert, setAlert] = useState(null);
-  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [isAlertsPopoverOpen, setIsAlertsPopoverOpen] = useState(false);
+  const alertsRef = useRef(null);
+
+  // Effect to handle clicks outside of the alerts popover to close it
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (alertsRef.current && !alertsRef.current.contains(event.target)) {
+        setIsAlertsPopoverOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [alertsRef]);
+
 
   useEffect(() => {
     if (mobileNumber) {
@@ -192,8 +208,10 @@ function Details() {
   };
 
   const handleNotificationClick = () => {
-    fetchLatestAlert();
-    setShowAlertModal(true);
+    if (!isAlertsPopoverOpen) {
+      fetchLatestAlert(); // Fetch alert only when opening
+    }
+    setIsAlertsPopoverOpen(prev => !prev);
   };
   
   const levelPercentage = waterLevel?.levelPercentage || 0;
@@ -208,11 +226,31 @@ function Details() {
             <BackIcon /> Back
           </button>
           <h1 className="hidden sm:block text-2xl font-bold text-gray-700">
-            Tank Monitor: <span className="text-blue-600">{mobileNumber}</span>
+            Tank Monitor: <span className="text-cyan-500">{mobileNumber}</span>
           </h1>
-          <button onClick={handleNotificationClick} className="p-3 bg-white rounded-full shadow-sm hover:bg-gray-50 text-gray-600 hover:text-blue-600 transition-colors duration-200" title="View Latest Alert">
-            <NotificationIcon />
-          </button>
+          {/* --- Notification Icon and Popover Container --- */}
+          <div className="relative" ref={alertsRef}>
+            <button 
+              onClick={handleNotificationClick} 
+              className="p-3 bg-white rounded-full shadow-sm hover:bg-gray-50 text-gray-600 hover:text-cyan-600 transition-colors duration-200" 
+              title="View Latest Alert"
+            >
+              <NotificationIcon />
+            </button>
+
+            {isAlertsPopoverOpen && (
+              <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl p-4 z-50 animate-fade-in-up border border-gray-200">
+                {/* --- UPDATED: Alert heading is now red --- */}
+                <h3 className="text-lg font-bold text-red-600 mb-2 border-b border-red-200 pb-2">Latest Alert</h3>
+                <div className="text-gray-700">
+                  <p>{alert?.message || 'Loading...'}</p>
+                  {alert?.timestamp && (
+                    <p className="text-xs text-gray-500 mt-2">{new Date(alert.timestamp).toLocaleString()}</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </header>
 
         {isLoading ? (
@@ -224,14 +262,14 @@ function Details() {
 
             <div className="lg:col-span-3 bg-white rounded-xl shadow-lg p-6 flex flex-col justify-center items-center">
               <h2 className="text-2xl font-bold text-gray-800 mb-6">Live Water Level</h2>
-              {/* Using the integrated WaterTank component */}
               <WaterTank levelPercentage={levelPercentage} />
             </div>
 
             <div className="lg:col-span-2 flex flex-col gap-6">
               <div className="bg-white rounded-xl shadow-lg p-6">
-                 <h2 className="text-xl font-semibold text-gray-500 mb-4">Current Readings</h2>
-                 <div className="space-y-3 text-lg">
+                 {/* --- UPDATED: Side heading is now cyan --- */}
+                 <h2 className="text-xl font-semibold text-cyan-500 mb-4">Current Readings</h2>
+                 <div className="space-y-3 text-lg text-gray-700">
                     <p><span className="font-semibold text-gray-600">Status:</span> 
                       <span className={`font-bold ml-2 ${statusInfo.color.replace('bg-', 'text-')}`}>
                         {statusInfo.text}
@@ -243,7 +281,8 @@ function Details() {
               </div>
 
               <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Recent Levels</h2>
+                {/* --- UPDATED: Side heading is now cyan --- */}
+                <h2 className="text-xl font-semibold text-cyan-500 mb-4 border-b pb-2">Recent Levels</h2>
                 {history.length > 0 ? (
                   <ul className="space-y-4 max-h-60 overflow-y-auto pr-2">
                     {history.map((data, index) => {
@@ -271,93 +310,9 @@ function Details() {
             </div>
           </main>
         )}
-        
-        {showAlertModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
-            <div className="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full transform transition-all animate-fade-in-up">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Latest Alert</h2>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700 text-lg">{alert?.message || 'Loading...'}</p>
-                {alert?.timestamp && (<p className="text-sm text-gray-500 mt-2">{new Date(alert.timestamp).toLocaleString()}</p>)}
-              </div>
-              <button onClick={() => setShowAlertModal(false)} className="mt-6 w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
-                Close
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
 export default Details;
-
-
-/*
- ==============================================================================
- ===                            REQUIRED CSS                                ===
- ==============================================================================
- 
-  !!! IMPORTANT !!!
-  
-  Copy the CSS code below and paste it into your global CSS file,
-  such as `src/index.css` or `src/App.css`.
-
- ==============================================================================
-*/
-
-/*
-.text-shadow-strong {
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-}
-
-@keyframes wave {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.animate-wave {
-  animation: wave 4s linear infinite;
-  transform-origin: bottom;
-}
-
-@keyframes wave-reverse {
-  0% { transform: translateX(-50%); }
-  100% { transform: translateX(0); }
-}
-
-.animate-wave-reverse {
-  animation: wave-reverse 6s linear infinite;
-  transform-origin: bottom;
-}
-
-.bg-wave-mask {
-  background-color: #3b82f6; 
-  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><defs><linearGradient id="wave-gradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.8)" /><stop offset="100%" style="stop-color:rgba(255,255,255,0)" /></linearGradient></defs><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,23.5V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="url(%23wave-gradient)"></path></svg>');
-  mask-size: 100% 100%;
-  mask-repeat: repeat-x;
-}
-
-.bg-wave-mask-reverse {
-  background-color: #60a5fa; 
-  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><defs><linearGradient id="wave-gradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.8)" /><stop offset="100%" style="stop-color:rgba(255,255,255,0)" /></linearGradient></defs><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,23.5V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="url(%23wave-gradient)"></path></svg>');
-  mask-size: 100% 100%;
-  mask-repeat: repeat-x;
-}
-
-@keyframes fade-in-up {
-  0% {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.3s ease-out forwards;
-}
-*/
