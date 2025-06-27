@@ -19,7 +19,8 @@
     "react-icons": "5.5.0",
     "react-router-dom": "7.6.2",
     "socket.io-client": "4.8.1",
-    "tailwindcss": "4.1.11"
+    "tailwindcss": "4.1.11",
+    "vercel": "44.2.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
